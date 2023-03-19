@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 
 use Illuminate\Http\Request;
-// use App\Http\Requests\ProductStoreRequest;
+use Illuminate\Pagination\Paginator;
 
 
 // Productモデル追加
@@ -27,18 +27,10 @@ class ProductController extends Controller
 
     // 商品一覧
     public function showList(Request $request) {
+        $perPage = 5;
         // productテーブルから全てのレコードを取得
-        $products = Product::with('company')->get();
+        $products = Product::with('company')->paginate($perPage);
         $companies = Company::all();
-        // キーワードから検索処理
-        // $keyword = $request->input('products');
-        //$keywordが空ではない場合、検索処理を実行
-        // if(!empty($keyword)) {
-        //     $products->where('product_name', 'LIKE', "%{$keyword}%")
-        //     ->orwhereHas('products', function ($query) use ($keyword) {
-        //         $query->where('product_name', 'LIKE', "%{$keyword}%");
-        //     })->get();
-        // }
         return view('plist', compact('products', 'companies'));
     }
     
