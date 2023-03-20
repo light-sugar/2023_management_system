@@ -29,11 +29,6 @@
                                             </option>
                                         @endforeach
                                     </select>
-                                    {{-- @if ($errors->has('company_id'))
-                                        <div class="invalid-feedback">{{ $errors->first('company_id') }}</div>
-                                    @else
-                                        <div class="invalid-feedback">必須項目です</div>
-                                    @endif --}}
                                 </div>
                             </div>
                             {{-- 検索ボタン --}}
@@ -85,7 +80,6 @@
                                     </td>
                                 </tr>
                             @endforeach
-                            {{ $products->links() }}
                         </tbody>
                     </table>
                 </div>
