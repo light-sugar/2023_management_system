@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 
 
-// Productモデル追加
+// 各モデル追加
 use App\Models\Product;
 use App\Models\Company;
 use App\Models\Sale;
@@ -28,7 +28,7 @@ class ProductController extends Controller
     // 商品一覧
     public function showList(Request $request) {
         $perPage = 5;
-        // productテーブルから全てのレコードを取得
+        // productテーブルから全てのレコードを取得、5つ表示したら次のページへ
         $products = Product::with('company')->paginate($perPage);
         $companies = Company::all();
         return view('plist', compact('products', 'companies'));
@@ -69,16 +69,27 @@ class ProductController extends Controller
     public function store(Request $request)
 {
     // 画像ファイルをアップロードする
+    $validatedData = $request->validate([
+        'img_path' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
     if (!$request->hasFile('img_path')) {
-        return redirect()->back()->withInput()->withErrors(['img_path' => '画像ファイルがアップロードされていません。']);
+        return redirect()->back()->withInput()->withErrors(['error' => config('messages.error')]);
     }
-    $img_path = $request->file('img_path')->store('public');
+    // public/imgディレクトリに保存する
+    $img_path = $request->file('img_path')->store('public/img');
 
-    // `public`ディレクトリに保存されるため、シンボリックリンクを作成する
-    if ($img_path !== false) {
-        $img_path = str_replace('public/', '', $img_path);
-        $img_path = '/storage/' . $img_path;
+    // 画像ファイルが保存されなかった場合はエラーを返す
+    if (!$img_path) {
+        return redirect()->back()->withInput()->withErrors(['error' => config('messages.error')]);
     }
+
+    // 保存したファイルのパスを取得する
+    $img_path = str_replace('public/', 'storage/', $img_path);
+
+    // // `public`ディレクトリに保存されるため、シンボリックリンクを作成する
+    // if ($img_path !== false) {
+    //     $img_path = str_replace('public/', 'storage/', $img_path);
+    // }
 
     // 商品情報を保存する
     $product = new Product;
@@ -90,7 +101,7 @@ class ProductController extends Controller
     $product->company_id = $request->company_id;
     $product->save();
 
-    return redirect('plist')->with('message', '登録しました');
+    return redirect('plist')->with('success', config('messages.success'));
 }
 
 

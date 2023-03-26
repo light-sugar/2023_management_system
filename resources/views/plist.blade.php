@@ -61,8 +61,8 @@
                             @foreach ($products as $product)
                                 <tr>
                                     <th scope="row">{{ $product->id }}</th>
-                                    <td><img src="{{ asset('img/' . $product->img_path) }}"
-                                            alt="{{ $product->product_name }}" width="50" height="50"></td>
+                                    <td><img src="{{ asset($product->img_path) }}" alt="{{ $product->product_name }}"
+                                            width="50" height="50"></td>
                                     <td>{{ $product->product_name }}</td>
                                     <td>{{ $product->price }}</td>
                                     <td>{{ $product->stock }}</td>
@@ -80,6 +80,7 @@
                                     </td>
                                 </tr>
                             @endforeach
+                            {{ $products->links() }}
                         </tbody>
                     </table>
                 </div>

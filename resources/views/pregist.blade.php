@@ -10,7 +10,6 @@
                         {{-- productの新規登録 --}}
                         <form action="{{ route('store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
-                            {{-- @method('put') --}}
                             {{-- 商品名入力 --}}
                             <div class="form-group row">
                                 <label for="product_name" class="col-sm-2 col-form-label">商品名<span
@@ -90,12 +89,12 @@
                                     <input type="file" value="{{ old('img_path') }}"
                                         class="custom-file-file{{ $errors->has('img_path') ? ' is-invalid' : '' }}"
                                         id="img_path" name="img_path">
-                                    {{-- <label class="custom-file-label" for="img_path">ファイルを選択してください</label> --}}
                                     @if ($errors->has('img_path'))
                                         <div class="invalid-feedback">{{ $errors->first('img_path') }}</div>
                                     @endif
                                 </div>
                             </div>
+
 
                             {{-- 登録ボタン --}}
                             <div class="text-right">
