@@ -17,7 +17,7 @@
                             </div>
                             <div class="form-group row">
                                 <label for="pict" class="col-sm-2 col-form-label">商品画像</label>
-                                <div class="col-sm-10"><img src="{{ asset('img/' . $product->img_path) }}"
+                                <div class="col-sm-10"><img src="{{ asset($product->img_path) }}"
                                         alt="{{ $product->product_name }}" width="50" height="50">
                                 </div>
                             </div>

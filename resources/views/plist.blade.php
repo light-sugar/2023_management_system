@@ -8,7 +8,8 @@
                     <div class="card-header">検索</div>
                     <div class="card-body">
                         {{-- 商品名とメーカー名の検索 --}}
-                        <form action="{{ route('search') }}" method="GET">
+                        <form id="search-form">
+                            {{-- action="{{ route('search') }}" method="GET"> --}}
                             @csrf
                             {{-- 商品名検索 --}}
                             <div class="form-group row">
@@ -44,7 +45,7 @@
                 </div>
                 {{-- 商品一覧テーブル --}}
                 <div class="text-center">
-                    <table class="table">
+                    <table class="table" id="plist-table">
                         <thead>
                             <tr>
                                 <th scope="col">ID</th>
