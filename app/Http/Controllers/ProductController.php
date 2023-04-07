@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 
 use Illuminate\Http\Request;
-use Illuminate\Pagination\Paginator;
-
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 // 各モデル追加
 use App\Models\Product;
@@ -27,11 +27,31 @@ class ProductController extends Controller
 
     // 商品一覧
     public function showList(Request $request) {
-        $perPage = 5;
         // productテーブルから全てのレコードを取得、5つ表示したら次のページへ
-        $products = Product::with('company')->paginate($perPage);
+        $products = Product::with('company')->paginate(5);
+        // dd($products);
         $companies = Company::all();
-        return view('plist', compact('products', 'companies'));
+        // dd($companies);
+
+        // ajaxを使ってjsonで返したい！！
+        // $data = [
+        //     'products' => $products,
+        //     'companies' => $companies,
+        // ];
+        // return response()->json(
+        //     [
+        //         'products' => [
+        //         'data' => $products->items(),
+        //         'links' => $products->links()->toHtml()
+        //         ],
+        //         'companies' => $companies,
+        //     ],
+        //     200,[],
+        // JSON_UNESCAPED_UNICODE
+        // );
+
+    // 同期処理で使っていたreturn部分
+    return view('plist', compact('products', 'companies'));
     }
     
 
@@ -39,6 +59,7 @@ class ProductController extends Controller
     public function search(Request $request) {
     $keyword = $request->input('keyword');
     $company_id = $request->input('company_id');
+    // dd($keyword, $company_id);
 
     $query = Product::query();
 
@@ -50,10 +71,20 @@ class ProductController extends Controller
         $query->where('company_id', $company_id);
     }
 
-    $products = $query->with('company')->get();
+    $products = $query->with('company')->paginate(5);
     $companies = Company::all();
-
+    
+    // ajaxを使ってjsonで返したい！！
+    // return response()->json([
+    //         'products' => $products,
+    //         'companies' => $companies],
+    //     200,[],
+    //     JSON_UNESCAPED_UNICODE
+    // );
+    
+    // 同期処理で使っていたreturn部分
     return view('plist', compact('products', 'companies'));
+
     }
 
 

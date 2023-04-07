@@ -15,7 +15,8 @@
                             <div class="form-group row">
                                 <label for="product_name" class="col-sm-2 col-form-label">商品名</label>
                                 <div class="col-sm-10">
-                                    <input type="text" name="keyword" class="form-control" placeholder="商品名を入力してください">
+                                    <input type="text" id="product_name" name="keyword" class="form-control"
+                                        placeholder="商品名を入力してください">
                                 </div>
                             </div>
                             {{-- メーカー名検索 --}}
@@ -58,7 +59,7 @@
                                 <th scope="col">削除</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="search-result">
                             @foreach ($products as $product)
                                 <tr>
                                     <th scope="row">{{ $product->id }}</th>
