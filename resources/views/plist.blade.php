@@ -8,8 +8,10 @@
                     <div class="card-header">検索</div>
                     <div class="card-body">
                         {{-- 商品名とメーカー名の検索 --}}
+                        {{-- 同期通信時のform --}}
+                        {{-- <form id="search-form" action="{{ route('search') }}" method="GET"> --}}
+                        {{-- 非同期通信時のform --}}
                         <form id="search-form">
-                            {{-- action="{{ route('search') }}" method="GET"> --}}
                             @csrf
                             {{-- 商品名検索 --}}
                             <div class="form-group row">
