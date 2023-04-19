@@ -8,7 +8,7 @@
                     <div class="card-header">商品編集</div>
                     <div class="card-body">
                         {{-- 商品編集画面 --}}
-                        <form action="{{ route('update', $product->id) }}" method="POST">
+                        <form action="{{ route('update', $product->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('put')
                             <div class="form-group row">
@@ -59,11 +59,22 @@
                                 </div>
                             </div>
                             <div class="form-group row">
+                                {{-- <label for="img_path" class="col-sm-2 col-form-label">商品画像</label>
+                                <div class="col-sm-10">
+                                    <input type="file"
+                                        class="custom-file-file{{ $errors->has('img_path') ? ' is-invalid' : '' }}"
+                                        name="img_path" value="{{ old('img_path', $product->img_path) }}"
+                                        enctype="multipart/form-data">
+                                    @if ($errors->has('img_path'))
+                                        <div class="invalid-feedback">{{ $errors->first('img_path') }}</div>
+                                    @endif
+                                </div> --}}
+
                                 <label for="img_path" class="col-sm-2 col-form-label">商品画像</label>
                                 <div class="col-sm-10">
                                     <input type="file"
                                         class="custom-file-file{{ $errors->has('img_path') ? ' is-invalid' : '' }}"
-                                        name="img_path" value="{{ old('img_path', $product->img_path) }}">
+                                        name="img_path">
                                     @if ($errors->has('img_path'))
                                         <div class="invalid-feedback">{{ $errors->first('img_path') }}</div>
                                     @endif
@@ -78,7 +89,7 @@
                 </div>
                 {{-- 戻るボタン --}}
                 <div class="text-right">
-                    <a class="btn btn-primary" href="{{ route('showList') }}" role="button">戻る</a>
+                    <a class="btn btn-primary" href="{{ route('detail', ['id' => $product->id]) }}" role="button">戻る</a>
                 </div>
             </div>
         </div>
