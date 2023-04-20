@@ -27,28 +27,13 @@ class ProductController extends Controller
 
     // 商品一覧
     public function showList(Request $request) {
-        // productテーブルから全てのレコードを取得、5つ表示したら次のページへ
-        $products = Product::with('company')->paginate(5);
-        // dd($products);
+        // テーブルカラム押下げごとにソート機能追加
+        $products = Product::sortable()->get();
+        // productテーブルから全てのレコードを取得、6つ表示したら次のページへ
+        // $products = Product::with('company')->paginate(6);
+        // ページネーション行わない場合のget
+        // $products = Product::with('company')->get();
         $companies = Company::all();
-        // dd($companies);
-
-        // ajaxを使ってjsonで返したい！！
-        // $data = [
-        //     'products' => $products,
-        //     'companies' => $companies,
-        // ];
-        // return response()->json(
-        //     [
-        //         'products' => [
-        //         'data' => $products->items(),
-        //         'links' => $products->links()->toHtml()
-        //         ],
-        //         'companies' => $companies,
-        //     ],
-        //     200,[],
-        // JSON_UNESCAPED_UNICODE
-        // );
 
     // 同期処理で使っていたreturn部分
     return view('plist', compact('products', 'companies'));
@@ -57,33 +42,53 @@ class ProductController extends Controller
 
     // 商品検索
     public function search(Request $request) {
-    $keyword = $request->input('keyword');
+    // 商品名とメーカーIDの取得
+    $product_name = $request->input('product_name');
     $company_id = $request->input('company_id');
+    // 下限・上限価格を取得
+    $min_price = $request->input('min_price');
+    $max_price = $request->input('max_price');
+    // 下限・上限在庫数を取得
+    $min_stock = $request->input('min_stock');
+    $max_stock = $request->input('max_stock');
     // dd($keyword, $company_id);
 
     $query = Product::query();
 
-    if ($keyword) {
-        $query->where('product_name', 'LIKE', "%{$keyword}%");
+    if ($product_name) {
+        $query->where('product_name', 'LIKE', "%{$product_name}%");
     }
 
     if ($company_id) {
         $query->where('company_id', $company_id);
     }
 
-    $products = $query->with('company')->paginate(5);
+    if ($min_price && $max_price) {
+        $query->whereBetween('price', [$min_price, $max_price]);
+    }
+
+    if ($min_stock && $max_stock) {
+        $query->stockRange($min_stock, $max_stock);
+    }
+
+    // $products = $query->with('company')->paginate(6);
+    // ページネーション行わない場合のget
+    $products = $query->with('company')->get();
+
+    if ($products->isEmpty()) {
+        // 検索結果が存在しない場合の処理をここに記述する
+        return response()->json(['error' => '検索結果が存在しません']);
+    }
     $companies = Company::all();
     
     // ajaxを使ってjsonで返したい！！
-    // return response()->json([
-    //         'products' => $products,
-    //         'companies' => $companies],
-    //     200,[],
-    //     JSON_UNESCAPED_UNICODE
-    // );
+    return response()->json([
+            'products' => $products,
+            'companies' => $companies
+            ]);
     
     // 同期処理で使っていたreturn部分
-    return view('plist', compact('products', 'companies'));
+    // return view('plist', compact('products', 'companies'));
 
     }
 
@@ -99,13 +104,14 @@ class ProductController extends Controller
 
     public function store(Request $request)
 {
+    // 新しいIDを生成する
+    $maxId = Product::max('id');
+    $newId = $maxId + 1;
+
     // 画像ファイルをアップロードする
     $validatedData = $request->validate([
         'img_path' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
     ]);
-    if (!$request->hasFile('img_path')) {
-        return redirect()->back()->withInput()->withErrors(['error' => config('messages.error')]);
-    }
     // public/imgディレクトリに保存する
     $img_path = $request->file('img_path')->store('public/img');
 
@@ -117,14 +123,9 @@ class ProductController extends Controller
     // 保存したファイルのパスを取得する
     $img_path = str_replace('public/', 'storage/', $img_path);
 
-    // // `public`ディレクトリに保存されるため、シンボリックリンクを作成する
-    // if ($img_path !== false) {
-    //     $img_path = str_replace('public/', 'storage/', $img_path);
-    // }
-
     // 商品情報を保存する
     $product = new Product;
-
+    $product->id = $newId;
     $product->product_name = $request->product_name;
     $product->price = $request->price;
     $product->stock = $request->stock;
@@ -134,6 +135,7 @@ class ProductController extends Controller
 
     return redirect('plist')->with('success', config('messages.success'));
 }
+
 
 
     //商品の詳細情報

@@ -47,13 +47,15 @@
                                 </div>
                             </div>
                         </form>
+                        {{-- 編集ボタン --}}
+                        <div class="text-right">
+                            <a class="btn btn-primary" href="{{ route('edit', $product->id) }}" role="button">編集</a>
+                        </div>
                     </div>
                 </div>
-                <div class="d-flex justify-content-between">
+                <div class="text-right">
                     {{-- 戻るボタン --}}
                     <a class="btn btn-primary" href="{{ route('showList') }}" role="button">戻る</a>
-                    {{-- 編集ボタン --}}
-                    <a class="btn btn-primary" href="{{ route('edit', $product->id) }}" role="button">編集</a>
                 </div>
             </div>
         </div>

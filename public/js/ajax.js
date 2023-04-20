@@ -1,33 +1,48 @@
 $(function () {
-    // 検索フォームのsubmitイベント
-    $('#search-form').submit(function (event) {
-        // フォームのsubmitイベントをキャンセル
-        event.preventDefault();
+
+    // 検索ボタンクリックしてイベント発生
+    $('#search-form-btn').on('click', function () {
         // 検索キーワードを取得
-        var keyword = $('#search-keyword').val();
         var productName = $("#product_name").val();
-        if (productName !== undefined && productName.indexOf(keyword) !== -1) {
-            // productNameがkeywordを含む場合の処理
-        }
-        var companyName = $("#company_name").val();
-        if (companyName !== undefined && companyName.indexOf(keyword) !== -1) {
-            // companyNameがkeywordを含む場合の処理
-        }
+        var companyId = $("#company_id").val();
+        // 下限・上限価格を取得
+        var minPrice = $("#min_price").val();
+        var maxPrice = $("#max_price").val();
+        // 下限・上限在庫数を取得
+        var minStock = $("#min_stock").val();
+        var maxStock = $("#max_stock").val();
+
+        // console.log(productName);
+        // console.log(companyId);
+
         $.ajax({
-            url: '/2023_management_system/public/plist',
+            url: '/psearch',
             type: 'GET',
             // 検索キーワードを送信する
-            data: { keyword: keyword },
-            dataType: 'json'
+            data: {
+                // 左はphpで受け取る時のキー名、右がjsの変数
+                product_name: productName,
+                company_id: companyId,
+                min_price: minPrice,
+                max_price: maxPrice,
+                min_stock: minStock,
+                max_stock: maxStock,
+            },
+            dataType: 'json',
         })
             .done(function (data) {
+
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
                 // テーブルのtbody要素を取得
                 var tbody = $('#search-result');
                 // 現在の商品一覧表示をクリア
                 tbody.empty();
 
                 // JSONデータをループしてテーブルに追加
-                $.each(data.products.data, function (i, product) {
+                $.each(data.products, function (i, product) {
                     var row = $('<tr>');
                     row.append($('<td>').text(product.id));
                     row.append($('<td>').html('<img src="' + product.img_path + '" alt="' + product.product_name + '" width="50" height="50">'));
@@ -35,18 +50,57 @@ $(function () {
                     row.append($('<td>').text(product.price));
                     row.append($('<td>').text(product.stock));
                     row.append($('<td>').text(product.company.company_name));
-                    row.append($('<td>').html('<a href="/2023_management_system/public/detail/' + product.id + '"><button type="submit" class="btn btn-info">詳細</button></a>'));
-                    row.append($('<td>').html('<form onsubmit="return confirm(\'本当に削除しますか？\')" action="/2023_management_system/public/delete/' + product.id + '" method="post">@csrf@method(\'delete\')<button type="submit" class="btn btn-danger">削除</button></form>'));
+                    row.append($('<td>').html('<a><button type="submit" class="btn btn-info">詳細</button></a>'));
+                    row.append($('<td>').html('<button type="button" id="delete-btn" class="btn btn-danger" data-product-id="' + product.id + '">削除</button>'));
                     tbody.append(row);
                 });
-                // ページネーションを更新
-                $('.pagination').html(data.products.links);
+
             })
             .fail(function (XMLHttpRequest, textStatus, errorThrown) {
-                alert('検索に失敗しました。');
+                alert('検索できてないよ');
                 console.log("XMLHttpRequest : " + XMLHttpRequest.status);
                 console.log("textStatus     : " + textStatus);
                 console.log("errorThrown    : " + errorThrown.message);
             });
     });
+
+    //削除ボタンのクリックイベント
+    $(document).on('click', '.btn.btn-danger', function () {
+        var deleteBtn = $(this);
+        //確認ダイアログを表示、OKが押されると削除処理実行
+        if (confirm('削除してよろしいですか？')) {
+            //商品IDを取得
+            var productId = deleteBtn.data('product-id');
+            // 削除処理を実行するajaxリクエスト
+            $.ajax({
+                url: '/destroy/' + productId,
+                type: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    _method: 'delete'
+                },
+                datatype: 'json'
+            })
+                .done(function (data) {
+                    // 成功時の処理
+                    deleteBtn.off('click');
+                    location.reload();
+
+                })
+                .fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                    // 削除が失敗した場合の処理
+                    alert('削除に失敗しました。');
+                    console.log("XMLHttpRequest : " + XMLHttpRequest.status);
+                    console.log("textStatus     : " + textStatus);
+                    console.log("errorThrown    : " + errorThrown.message);
+                });
+        }
+    });
+
 });
+
+// ページのロードが完了した後に実行される
+// document.addEventListener('DOMContentLoaded', function () {
+//     // デフォルトで選択された選択肢を解除する
+//     document.getElementById('company_id').selectedIndex = -1;
+// });
