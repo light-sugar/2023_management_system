@@ -60,6 +60,7 @@
                             </div>
                         </div>
 
+
                         {{-- 検索ボタン --}}
                         <div class="text-right">
                             <button type="button" class="btn btn-primary" id="search-form-btn">検索</button>
