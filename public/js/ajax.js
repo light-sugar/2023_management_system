@@ -99,8 +99,3 @@ $(function () {
 
 });
 
-// ページのロードが完了した後に実行される
-// document.addEventListener('DOMContentLoaded', function () {
-//     // デフォルトで選択された選択肢を解除する
-//     document.getElementById('company_id').selectedIndex = -1;
-// });

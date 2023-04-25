@@ -105,15 +105,6 @@
                                         <button type="button" id="delete-btn" class="btn btn-danger"
                                             data-product-id="{{ $product->id }}">削除</button>
                                     </td>
-                                    {{-- <td>
-                                        <form onsubmit="return confirm('本当に削除しますか？')"
-                                            action="{{ route('destroy', ['id' => $product->id]) }}" method="post">
-                                            @csrf
-                                            @method('delete')
-                                            <button type="submit" id="delete-btn" class="btn btn-danger">削除</button>
-                                        </form>
-                                    </td> --}}
-
                                 </tr>
                             @endforeach
                             {{-- // ページネーションは一旦保留 --}}

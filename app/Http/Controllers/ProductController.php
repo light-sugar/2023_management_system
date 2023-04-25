@@ -43,34 +43,56 @@ class ProductController extends Controller
     // 商品検索
     public function search(Request $request) {
     // 商品名とメーカーIDの取得
-    $product_name = $request->input('product_name');
-    $company_id = $request->input('company_id');
+    $product_name = $request->get('product_name');
+    $company_id = $request->get('company_id');
     // 下限・上限価格を取得
-    $min_price = $request->input('min_price');
-    $max_price = $request->input('max_price');
+    $min_price = $request->get('min_price');
+    $max_price = $request->get('max_price');
     // 下限・上限在庫数を取得
-    $min_stock = $request->input('min_stock');
-    $max_stock = $request->input('max_stock');
+    $min_stock = $request->get('min_stock');
+    $max_stock = $request->get('max_stock');
     // dd($keyword, $company_id);
 
     $query = Product::query();
+    $hasSearchQuery = false;
 
     if ($product_name) {
         $query->where('product_name', 'LIKE', "%{$product_name}%");
-    }
-
-    if ($company_id) {
+        $hasSearchQuery = true;
+      }
+    
+      if ($company_id) {
         $query->where('company_id', $company_id);
-    }
+        $hasSearchQuery = true;
+      }
+    
+      if ($min_price) {
+        $query->where('price', '>=', $min_price);
+        $hasSearchQuery = true;
+      }
+    
+      if ($max_price) {
+        $query->where('price', '<=', $max_price);
+        $hasSearchQuery = true;
+      }
+    // minが0の場合は、max以下で検索
+      if ($min_stock !== null || $max_stock !== null) {
+        $minStock = $min_stock ?? 0;
+        $maxStock = $max_stock ?? PHP_INT_MAX;
+        $query->stockRange($minStock, $maxStock);
+        $hasSearchQuery = true;
+      }
 
-    if ($min_price && $max_price) {
-        $query->whereBetween('price', [$min_price, $max_price]);
-    }
 
-    if ($min_stock && $max_stock) {
-        $query->stockRange($min_stock, $max_stock);
+    if (!$hasSearchQuery) {
+        $products = Product::with('company')->get();
+        $companies = Company::all();
+        return response()->json([
+            'products' => $products,
+            'companies' => $companies
+        ]);
     }
-
+    
     // $products = $query->with('company')->paginate(6);
     // ページネーション行わない場合のget
     $products = $query->with('company')->get();
@@ -167,6 +189,27 @@ class ProductController extends Controller
         $product->delete();
         // 削除したら一覧画面にリダイレクト
         return redirect('plist');
+    }
+
+    // 在庫数の更新
+    public function updateStock(Request $request, $productId, $quantity) {
+        // findOrFail()を使ってnot foundで返す
+        $product = Product::findOrFail($productId);
+
+        // 在庫数が不足している場合
+        if ($product->stock < $quantity) {
+            return response()->json([
+                'message' => '在庫が不足しています',
+            ], 400);
+        }
+        // 商品の在庫数を $quantity に更新
+        $product->stock -= $quantity;
+        $product->save();
+
+        return response()->json([
+            'message' => '在庫数の更新が完了しました',
+            'data' => $product,
+        ]);
     }
 }
 

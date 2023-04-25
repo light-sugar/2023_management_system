@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Http\Controllers\ProductController;
 use Kyslik\ColumnSortable\Sortable;
+use Illuminate\Support\Facades\Validator;
 
 class Product extends Model
 {
@@ -22,7 +23,7 @@ class Product extends Model
     ];
     // ソートしたいカラムを指定
     public $sortable = [
-        'id','img_path','product_name',
+    'id','img_path','product_name',
     'price','stock','company_id'
     ];
 
@@ -38,6 +39,10 @@ class Product extends Model
         return Company::all();
     }
 
+    // saleとのリレーション
+    public function sales() {
+        return $this->hasMany(Sale::class);
+    }
 
 // 更新処理
     public function updateProduct($request, $product, $companies) {
@@ -60,26 +65,40 @@ class Product extends Model
         return $result;
     }
 // 価格範囲の検索
-    public function scopePriceRange($query, $min_price, $max_price)
+    public function scopePriceRange($query, $min_price = null, $max_price = null)
 {
+    $validator = Validator::make(compact('minPrice', 'maxPrice'), [
+        'minPrice' => 'nullable|numeric|min:0',
+        'maxPrice' => 'nullable|numeric|min:0|gte:minPrice',
+    ]);
+
+    if ($validator->fails()) {
+        throw new InvalidArgumentException('Validation failed: ' . $validator->errors()->first());
+    }
+
     if ($min_price && $max_price) {
         $query->whereBetween('price', [$min_price, $max_price]);
-    } elseif ($min_price) {
+    } elseif ($min_price!== null) {
         $query->where('price', '>=', $min_price);
-    } elseif ($max_price) {
+    } elseif ($max_price!== null) {
         $query->where('price', '<=', $max_price);
     }
     return $query;
 }
 // 在庫数範囲の検索
-    public function scopeStockRange($query, $minStock, $maxStock)
+public function scopeStockRange($query, $minStock = null, $maxStock = null)
 {
-    if ($minStock !== null && $maxStock !== null) {
-        $query->whereBetween('stock', [$minStock, $maxStock]);
-    } elseif ($minStock !== null) {
-        $query->where('stock', '>=', $minStock);
-    } elseif ($maxStock !== null) {
-        $query->where('stock', '<=', $maxStock);
+    $validator = Validator::make(compact('minStock', 'maxStock'), [
+        'minStock' => 'nullable|numeric|min:0',
+        'maxStock' => 'nullable|numeric|min:0|gte:minStock',
+    ]);
+
+    if ($validator->fails()) {
+        throw new InvalidArgumentException('Validation failed: ' . $validator->errors()->first());
+    }
+
+    if ($minStock !== null || $maxStock !== null) {
+        $query->whereBetween('stock', [$minStock ?? 0, $maxStock ?? PHP_INT_MAX]);
     }
     return $query;
 }
