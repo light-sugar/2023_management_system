@@ -48,3 +48,4 @@ Route::put('/update/{id}', 'ProductController@update')->name('update');
 
 // 商品の削除処理
 Route::delete('/destroy/{id}', 'ProductController@destroy')->name('destroy');
+

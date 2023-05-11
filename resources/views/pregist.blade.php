@@ -32,9 +32,11 @@
                                 <div class="col-sm-10">
                                     <select name="company_id" id="company_id"
                                         class="form-control @if ($errors->has('company_id')) is-invalid @endif is-valid">
-                                        <option value="" selected>メーカー名を選択してください</option>
+                                        <option hidden>メーカー名を選択してください</option>
                                         @foreach ($companies as $company)
-                                            <option value="{{ $company->id }}">{{ $company->company_name }}
+                                            <option value="{{ $company->id }}"
+                                                @if (old('company_id', '') == $company->id) selected @endif>
+                                                {{ $company->company_name }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -105,7 +107,7 @@
                 </div>
                 {{-- 戻るボタン --}}
                 <div class="text-right">
-                    <a class="btn btn-primary" href="{{ route('showList') }}" role="button">一覧画面へ</a>
+                    <a class="btn btn-primary" href="{{ route('showList') }}" role="button">戻る</a>
                 </div>
             </div>
         </div>

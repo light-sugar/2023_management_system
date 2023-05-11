@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\SaleController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -16,3 +19,7 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// http://localhost:8888/api/saleへアクセス
+// APIでの購入処理
+Route::post('/sale', 'SaleController@store');
